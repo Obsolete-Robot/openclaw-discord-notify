@@ -7,7 +7,8 @@ OpenClaw skill for sending Discord notifications via webhook.
 ```bash
 # Clone to your OpenClaw workspace
 cd ~/.openclaw/workspace/skills
-git clone git@github.com:Obsolete-Robot/openclaw-discord-notify.git discord-notify
+git clone https://github.com/Obsolete-Robot/openclaw-discord-notify.git discord-notify
+# Or with SSH: git clone git@github.com:Obsolete-Robot/openclaw-discord-notify.git discord-notify
 
 # Copy and configure the script
 cp discord-notify/scripts/notify.sh ~/workspace/scripts/
