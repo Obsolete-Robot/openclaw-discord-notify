@@ -35,6 +35,16 @@ See [PIPELINE.md](PIPELINE.md) for the complete GitHub Issue → Discord Thread 
 
 ## Setup
 
+### 0. Configure OpenClaw (Critical!)
+
+Your agent must respond to bot messages to see webhook @mentions:
+
+```yaml
+# openclaw.yaml
+discord:
+  respondToBots: true   # Required for webhook pipeline!
+```
+
 ### 1. Get Discord Webhook URL
 
 1. Open Discord channel settings → Integrations → Webhooks

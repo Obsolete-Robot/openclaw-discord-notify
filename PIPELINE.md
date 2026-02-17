@@ -53,6 +53,20 @@ A complete workflow for automated issue triage using Discord forum threads and O
 
 ## Configuration
 
+### OpenClaw Setup (Critical!)
+
+The agent must be configured to **respond to bot messages**, otherwise it won't see the webhook @mentions.
+
+In your OpenClaw config (`openclaw.yaml`), set:
+
+```yaml
+discord:
+  # ... other settings ...
+  respondToBots: true   # Required! Webhooks are "bot" messages
+```
+
+Without this, the agent will ignore the instructions posted by the webhook and won't pick up work.
+
 ### Required Secrets
 
 ```bash
