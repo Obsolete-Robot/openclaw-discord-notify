@@ -224,6 +224,14 @@ All scripts source `config.sh` automatically. You can still override with env va
 - `gh` — GitHub CLI (for issue-to-thread)
 - `node` — For create-post.mjs
 
+## Agent Onboarding Guides
+
+| Role | Guide | Description |
+|------|-------|-------------|
+| Producer | [PRODUCER-ONBOARDING.md](PRODUCER-ONBOARDING.md) | Routes issues to workers, manages the board |
+| Branch Worker | [BRANCH-WORKER-ONBOARDING.md](BRANCH-WORKER-ONBOARDING.md) | Implements fixes, creates PRs |
+| PR Reviewer | [PR-REVIEWER-ONBOARDING.md](PR-REVIEWER-ONBOARDING.md) | Reviews code, provides feedback |
+
 ## License
 
 MIT
