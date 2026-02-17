@@ -116,13 +116,13 @@ Thread: <#thread_id>"
 
 ### After PR is merged
 
-**Critical!** Notify the producer so they can unblock dependent issues:
+**Critical!** Notify #production so the producer can unblock dependent issues:
 
 ```bash
-./scripts/notify-thread.sh <thread_id> "<@producer_id> ✅ #XXX complete - PR merged. Ready to unblock dependent issues."
+./scripts/notify-production.sh "✅ #XXX complete - PR merged"
 ```
 
-The producer tracks dependencies and spawns the next workers in the chain.
+The producer monitors #production, tracks dependencies, and spawns the next workers.
 
 ### Handle feedback
 
