@@ -10,9 +10,15 @@
 # ============ CONFIGURATION ============
 # Edit these for your setup:
 
-WEBHOOK_URL="${DISCORD_WEBHOOK_URL:-YOUR_WEBHOOK_URL_HERE}"
-TARGET_USER_ID="${DISCORD_TARGET_USER:-YOUR_USER_ID_HERE}"
-DEFAULT_SENDER="${DISCORD_SENDER_NAME:-Notification}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -f "$SCRIPT_DIR/config.sh" ]; then
+  source "$SCRIPT_DIR/config.sh"
+  load_secrets
+fi
+
+WEBHOOK_URL="${DISCORD_WEBHOOK_URL:-${REVIEWS_WEBHOOK_URL:-YOUR_WEBHOOK_URL_HERE}}"
+TARGET_USER_ID="${DISCORD_TARGET_USER:-${AGENT_ID:-YOUR_USER_ID_HERE}}"
+DEFAULT_SENDER="${DISCORD_SENDER_NAME:-PR Bot}"
 
 # ============ END CONFIGURATION ============
 
