@@ -114,6 +114,16 @@ PR: https://github.com/owner/repo/pull/YYY
 Thread: <#thread_id>"
 ```
 
+### After PR is merged
+
+**Critical!** Notify the producer so they can unblock dependent issues:
+
+```bash
+./scripts/notify-thread.sh <thread_id> "<@producer_id> ✅ #XXX complete - PR merged. Ready to unblock dependent issues."
+```
+
+The producer tracks dependencies and spawns the next workers in the chain.
+
 ### Handle feedback
 
 If reviewers request changes:
