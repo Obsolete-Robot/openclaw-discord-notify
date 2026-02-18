@@ -38,11 +38,26 @@ There are **two parts** to setup: the webhook/scripts side, and the OpenClaw con
 
 #### 1. Create Discord Webhooks
 
-For each channel you want to notify:
+You can create webhooks two ways:
+
+**Option A: Manual (via Discord UI)**
 
 1. Open the Discord channel → Settings → Integrations → Webhooks
 2. Click "New Webhook", name it (e.g. "PR Bot"), and copy the URL
-3. Save each webhook URL to a file:
+
+**Option B: Programmatic (via API with bot token)**
+
+```bash
+# Create webhook via Discord API
+curl -X POST "https://discord.com/api/v10/channels/CHANNEL_ID/webhooks" \
+  -H "Authorization: Bot $(cat ~/.config/discord/bot-token)" \
+  -H "Content-Type: application/json" \
+  -d '{"name": "PR Review Bot"}' | jq -r '"https://discord.com/api/webhooks/\(.id)/\(.token)"'
+```
+
+This creates a webhook owned by your bot (has `application_id`). See [Troubleshooting](#-understanding-webhook-identity-and-own-message-filtering) for details on how this affects message filtering.
+
+**Save webhook URLs to config files:**
 
 ```bash
 mkdir -p ~/.config/discord
@@ -215,30 +230,46 @@ Check the basics first:
 3. Is the channel set to `allow: true`?
 4. Is `requireMention` set appropriately?
 
-### ⚠️ Critical: "Own Messages Filtered" Issue
+### ⚠️ Understanding Webhook Identity and Own-Message Filtering
 
-**If your bot created the webhook using its own token**, webhook messages will be silently filtered — even with `allowBots: true`.
+When a bot creates a webhook using its token, Discord records two IDs:
 
-**Why this happens:** When a bot creates a webhook via the Discord API using its own bot token, Discord tags that webhook with the bot's `application_id`. Messages sent through that webhook are then considered "from" the bot, and OpenClaw filters them as own messages.
+- **`webhook_id`** — The webhook's own unique ID (also used as `author.id` for messages)
+- **`application_id`** — The bot that created the webhook
 
-**The fix:** Create webhooks **manually** through Discord's UI instead of via your bot token:
+When posting through a webhook, the **message author is the webhook**, not the bot:
 
-1. Open the Discord channel → Settings → Integrations → Webhooks
-2. Click "New Webhook" and configure it
-3. Copy the webhook URL
+```json
+{
+  "author": { "id": "1472328189132148777" },  // Webhook ID (message author)
+  "webhook_id": "1472328189132148777",        // Same as author
+  "application_id": "1471574185724608675"     // Bot that created webhook
+}
+```
 
-Webhooks created through the UI have no `application_id` association, so your bot will see messages posted through them as external messages.
+**OpenClaw filters on `author.id`**, so webhook messages work fine — the author is the webhook, not your bot.
 
-**Alternative:** If you have a second bot token (different application), you can create webhooks using that token instead. The messages will appear to come from the other application, not your main bot.
+**However**, some bot frameworks filter on `application_id` instead, which is stricter. If your bot does this, webhook messages will be filtered even though the author is technically different.
+
+**Solutions if your bot filters on `application_id`:**
+
+1. **Create webhooks manually** through Discord's UI (Settings → Integrations → Webhooks) — these have no `application_id`
+
+2. **Use a different bot token** to create the webhook — messages will have a different `application_id`
+
+3. **Modify your bot's filtering logic** to check `author.id` instead of `application_id`
 
 ```
-Bot Token A creates webhook ──► Webhook has application_id = A
-                                 ↓
-Bot A posts via webhook ───────► Bot A filters as "own message" ❌
+How webhook messages appear:
 
-Manual webhook (no app ID) ────► No application_id
-                                 ↓
-Bot A posts via webhook ───────► Bot A sees as external message ✓
+Bot A creates webhook ──► webhook.application_id = A
+                          webhook.id = W
+                              ↓
+Post via webhook ─────────► message.author.id = W (webhook)
+                            message.application_id = A (creating bot)
+                              ↓
+OpenClaw checks ──────────► author.id (W) ≠ bot.id (A) → ✓ Processes message
+Strict bot checks ────────► application_id (A) = bot.id (A) → ❌ Filters message
 ```
 
 ### Webhook Messages Appear But Bot Doesn't Respond
