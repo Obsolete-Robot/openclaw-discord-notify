@@ -204,6 +204,58 @@ Your Script          Discord Webhook        OpenClaw Bot
 
 Webhooks post as a different identity than the bot, so OpenClaw sees them as external messages and processes them normally — as long as the config allows it.
 
+## Troubleshooting
+
+### Bot Doesn't Respond to Webhook Messages
+
+Check the basics first:
+
+1. Is `allowBots: true` set at the `channels.discord` level?
+2. Is the webhook ID in the guild's `users` array?
+3. Is the channel set to `allow: true`?
+4. Is `requireMention` set appropriately?
+
+### ⚠️ Critical: "Own Messages Filtered" Issue
+
+**If your bot created the webhook using its own token**, webhook messages will be silently filtered — even with `allowBots: true`.
+
+**Why this happens:** When a bot creates a webhook via the Discord API using its own bot token, Discord tags that webhook with the bot's `application_id`. Messages sent through that webhook are then considered "from" the bot, and OpenClaw filters them as own messages.
+
+**The fix:** Create webhooks **manually** through Discord's UI instead of via your bot token:
+
+1. Open the Discord channel → Settings → Integrations → Webhooks
+2. Click "New Webhook" and configure it
+3. Copy the webhook URL
+
+Webhooks created through the UI have no `application_id` association, so your bot will see messages posted through them as external messages.
+
+**Alternative:** If you have a second bot token (different application), you can create webhooks using that token instead. The messages will appear to come from the other application, not your main bot.
+
+```
+Bot Token A creates webhook ──► Webhook has application_id = A
+                                 ↓
+Bot A posts via webhook ───────► Bot A filters as "own message" ❌
+
+Manual webhook (no app ID) ────► No application_id
+                                 ↓
+Bot A posts via webhook ───────► Bot A sees as external message ✓
+```
+
+### Webhook Messages Appear But Bot Doesn't Respond
+
+The webhook ID needs to be in the `users` allowlist (if using `groupPolicy: "allowlist"`). Get the webhook ID from the URL:
+
+```
+https://discord.com/api/webhooks/{WEBHOOK_ID}/{token}
+                                  ^^^^^^^^^^^
+```
+
+Add it to your config:
+
+```json
+"users": ["real_user_1", "real_user_2", "WEBHOOK_ID_HERE"]
+```
+
 ## Environment Variables
 
 All scripts source `config.sh` automatically. You can still override with env vars:
