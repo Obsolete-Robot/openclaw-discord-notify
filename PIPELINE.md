@@ -150,6 +150,79 @@ Use GitHub Projects V2 with these status columns:
 - Human marks "Done" after verification
 - Archive thread after marking Done
 
+## Git Worktree Workflow
+
+Agents should work in **isolated git worktrees** on feature branches — never commit directly to `main` or `dev`. This keeps the main repo clean and lets multiple issues be worked in parallel.
+
+### Per-Issue Workflow
+
+```bash
+# 1. Create a feature branch from dev (or main)
+cd ~/your-repo
+git fetch origin
+git checkout dev && git pull
+
+# 2. Create a worktree for this issue
+git worktree add ../your-repo-issue-42 -b fix/issue-42-short-description
+
+# 3. Work in the worktree
+cd ../your-repo-issue-42
+# ... make changes, test, etc.
+
+# 4. Commit and push
+git add -A
+git commit -m "fix: short description of change (#42)"
+git push origin fix/issue-42-short-description
+
+# 5. Create PR
+gh pr create --base dev --title "Fix: short description (#42)" \
+  --body "Closes #42
+
+## Changes
+- What changed
+- Why"
+
+# 6. Notify reviewers
+./scripts/notify-pr-reviews.sh "🆕 PR ready - #42: Short description"
+
+# 7. Clean up worktree after PR is merged
+cd ~/your-repo
+git worktree remove ../your-repo-issue-42
+git branch -d fix/issue-42-short-description
+```
+
+### Branch Naming Convention
+
+| Type | Format | Example |
+|------|--------|---------|
+| Bug fix | `fix/issue-N-description` | `fix/issue-7-negative-tax-rate` |
+| Feature | `feat/issue-N-description` | `feat/issue-4-pdf-export` |
+| Chore | `chore/issue-N-description` | `chore/issue-5-verify-email` |
+
+### Why Worktrees?
+
+- **Parallel work** — Multiple issues can be in progress simultaneously without stashing
+- **Clean separation** — Each issue gets its own directory, no accidental cross-contamination
+- **Easy cleanup** — Remove the worktree when done, branch gets deleted after merge
+- **PR-friendly** — Each branch = one PR = one issue, clean history
+
+### Webhook Notification Template
+
+When posting issue assignments via webhook, include worktree instructions:
+
+```
+🔔 **Assigned: Issue #N — Title**
+
+🔗 https://github.com/org/repo/issues/N
+
+Summary of what needs to happen.
+
+**Branch:** `fix/issue-N-description`
+**Workflow:** Create worktree → implement → PR to dev → notify reviewers
+
+@agent you're up!
+```
+
 ## Best Practices
 
 1. **One issue per thread** — Keep scope focused
@@ -157,6 +230,8 @@ Use GitHub Projects V2 with these status columns:
 3. **Human reviews all PRs** — Agents do the work, humans verify
 4. **Archive completed threads** — Keeps forum clean
 5. **Use priority column** — Drag issues to prioritize, then spawn workers
+6. **Always use worktrees** — Never work directly in the main clone
+7. **Branch from dev** — PRs target dev, not main (main is production)
 
 ## Dependencies
 

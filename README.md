@@ -287,6 +287,32 @@ Add it to your config:
 "users": ["real_user_1", "real_user_2", "WEBHOOK_ID_HERE"]
 ```
 
+## Webhook Issue Assignment Template
+
+When assigning issues via webhook, include branch and worktree instructions so the receiving agent knows the workflow:
+
+```
+🔔 **Assigned: Issue #N — Title**
+
+🔗 https://github.com/org/repo/issues/N
+
+Brief summary of what needs to happen.
+
+**Branch:** `fix/issue-N-short-description`
+**Workflow:** Create worktree → implement on branch → PR to dev → notify reviewers
+
+@agent you're up!
+```
+
+The agent should:
+1. Create a git worktree: `git worktree add ../repo-issue-N -b fix/issue-N-description`
+2. Work in the worktree directory
+3. Push the branch and create a PR targeting `dev`
+4. Notify reviewers via `notify-pr-reviews.sh`
+5. Clean up the worktree after merge
+
+See [PIPELINE.md](PIPELINE.md) for the full git worktree workflow.
+
 ## Environment Variables
 
 All scripts source `config.sh` automatically. You can still override with env vars:
