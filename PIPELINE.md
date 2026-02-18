@@ -157,13 +157,13 @@ Agents should work in **isolated git worktrees** on feature branches — never c
 ### Per-Issue Workflow
 
 ```bash
-# 1. Create a feature branch from dev (or main)
+# 1. Branch from dev — all in-progress work lives on dev
 cd ~/your-repo
 git fetch origin
 git checkout dev && git pull
 
-# 2. Create a worktree for this issue
-git worktree add ../your-repo-issue-42 -b fix/issue-42-short-description
+# 2. Create a worktree branching FROM dev
+git worktree add ../your-repo-issue-42 -b fix/issue-42-short-description dev
 
 # 3. Work in the worktree
 cd ../your-repo-issue-42
@@ -198,6 +198,13 @@ git branch -d fix/issue-42-short-description
 | Bug fix | `fix/issue-N-description` | `fix/issue-7-negative-tax-rate` |
 | Feature | `feat/issue-N-description` | `feat/issue-4-pdf-export` |
 | Chore | `chore/issue-N-description` | `chore/issue-5-verify-email` |
+
+### Important: Always Branch from `dev`
+
+- **`dev`** is the working branch — all feature branches start here, all PRs target here
+- **`main`** is production — only updated by merging dev → main when ready to deploy
+- Never branch from `main` for in-progress work
+- Never PR directly to `main` unless it's a hotfix
 
 ### Why Worktrees?
 

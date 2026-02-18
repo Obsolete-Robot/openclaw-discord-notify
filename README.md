@@ -305,7 +305,7 @@ Brief summary of what needs to happen.
 ```
 
 The agent should:
-1. Create a git worktree: `git worktree add ../repo-issue-N -b fix/issue-N-description`
+1. Create a git worktree from dev: `git worktree add ../repo-issue-N -b fix/issue-N-description dev`
 2. Work in the worktree directory
 3. Push the branch and create a PR targeting `dev`
 4. Notify reviewers via `notify-pr-reviews.sh`
